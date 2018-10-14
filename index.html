@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Waddup Hackerschool</title>
+</head>
+
+<body>
+
+  <section id="app">
+    <h1>Your Todo List: {{ completedCount }} / {{ todos.length }}</h1>
+
+    <form v-on:submit.prevent="addTodo">
+      <label for="taskName">New Task</label>
+      <input type="text" id="taskName" name="taskName" v-model="newTodoName" autofocus />
+      <button type="submit" :disabled="disabled">Add Task</button>
+      <p v-show="newTodoName.length > 50" style="color: red">
+        Oi don't type so long la short and sweet please
+      </p>
+    </form>
+
+    <ul>
+      <li v-for="todo in todos" track-by="id" :class="{ completed: todo.isDone }">
+        <label>
+          <input type="checkbox" v-model="todo.isDone" @click="toggleIsDone(todo)">
+          {{ todo.name }}
+        </label>
+        <button @click="removeTodo(todo)">Archive</button>
+        <p v-if="todo.isDone">
+          Completed at
+          {{ todo.completed.getHours() }}:{{ todo.completed.getMinutes() }}
+          on
+          {{ todo.completed.toDateString() }}
+        </p>
+      </li>
+    </ul>
+
+    <hr />
+
+    <h2>Archived tasks</h2>
+
+    <ul>
+      <li v-for="archive in archived" track-by="id" class="archive">
+        <p>{{ archive.name }}</p>
+        <span v-if="archive.isDone">
+          Completed at
+          {{ archive.completed.getHours() }}:{{ archive.completed.getMinutes() }}
+          on
+          {{ archive.completed.toDateString() }}
+        </span>
+        <span v-else>Not completed</span>
+      </li>
+    </ul>
+
+  </section>
+
+  <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
+
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        newTodoName: "",
+        id: 3,
+        todos: [
+          { id: 2, name: 'Eat chicken wings', isDone: false, completed: null },
+          { id: 1, name: 'Fry chicken wings', isDone: false, completed: null },
+          { id: 0, name: 'Apply Hackerschool', isDone: true, completed: new Date() },
+        ],
+        archived: [],
+      },
+      computed: {
+        completedCount() {
+          return this.todos.filter(todo => todo.isDone).length;
+        },
+        disabled() {
+          return this.newTodoName === '' || this.newTodoName.length > 50;
+        }
+      },
+      methods: {
+        toggleIsDone(todo) {
+          todo.isDone = !todo.isDone;
+          if (todo.isDone) {
+            todo.completed = new Date();
+          }
+        },
+        addTodo() {
+          this.todos.unshift({
+            id: this.id,
+            name: this.newTodoName,
+            isDone: false
+          });
+          this.id++;
+          this.newTodoName = "";
+        },
+        removeTodo(todo) {
+          const index = this.todos.indexOf(todo);
+          this.todos.splice(index, 1);
+          this.archived.push({ ...todo });
+        }
+      },
+    });
+  </script>
+
+  <style>
+    body {
+      margin: 0 auto;
+      max-width: 960px;
+    }
+
+    li.archive {
+      color: grey;
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      color: grey;
+    }
+  </style>
+
+</body>
+
+</html>
